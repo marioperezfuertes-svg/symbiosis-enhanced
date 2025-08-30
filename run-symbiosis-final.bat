@@ -1,6 +1,6 @@
 @echo off
 REM =====================================================
-REM Script final Symbiosis - Todo incluido
+REM Script final Symbiosis - Auto sincronización Git
 REM =====================================================
 
 REM ----- Carpeta del proyecto -----
@@ -23,18 +23,30 @@ IF ERRORLEVEL 1 (
     exit /b
 )
 
-REM ----- Configurar usuario Git (solo si no está configurado) -----
+REM ----- Configurar usuario Git -----
 git config --global user.name "Mario Perez Fuertes"
 git config --global user.email "marioperezfuertes@gmail.com"
 
-REM ----- Inicializar Git y subir a GitHub -----
-git init
-git add .
-git commit -m "Primer commit"
-git branch -M main
-git remote remove origin
+REM ----- Inicializar Git si no existe -----
+IF NOT EXIST ".git" (
+    echo Inicializando Git...
+    git init
+    git add .
+    git commit -m "Primer commit"
+    git branch -M main
+    git remote add origin https://github.com/marioperezfuertes-svg/symbiosis-enhanced.git
+)
+
+REM ----- Sincronizar con GitHub (pull + merge automático) -----
+echo Sincronizando con GitHub...
+git remote remove origin >nul 2>&1
 git remote add origin https://github.com/marioperezfuertes-svg/symbiosis-enhanced.git
-git push -u origin main
+git pull origin main --allow-unrelated-histories --no-edit
+
+REM ----- Agregar y hacer commit automático de cambios locales -----
+git add .
+git commit -m "Actualización automática" >nul 2>&1
+git push origin main
 
 REM ----- Instalar dependencias -----
 IF EXIST requirements.txt (
@@ -56,6 +68,6 @@ IF EXIST scripts\dev.py (
 REM ----- Final -----
 echo.
 echo =====================================================
-echo Proyecto ejecutado correctamente (con comprobaciones).
+echo Proyecto ejecutado correctamente con sincronizacion Git.
 echo Presiona cualquier tecla para cerrar...
 pause
